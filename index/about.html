@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="favicon.webp" rel="icon">
+    <title>Shiny Server About</title>
+    <link rel="stylesheet" href="style.css">
+     <style>
+         a {
+            font-size: 16px;
+         }
+         .about-link {
+             position: absolute;
+             bottom: 10px;
+             right: 50px;
+         }
+     </style>
+</head>
+<body>
+    <header>
+        <div class="empa-horizontal-line"></div>
+        <div>
+            <h1><a href="index.html" style="color: #be0000; font-size: 34px">Shiny Server</a></h1>
+        </div>
+        <nav class="about-link">
+            <a href="about.html" style="font-size:18px">About</a>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <h1>About this Shiny-Server</h1>
+        <p>The purpose of this Shiny-server is to make code easily accessible to users without requiring any programming skills or the need to install any software locally. This server hosts a variety of applications written in Python and R, providing tools for data analysis, visualizations or simulations.</p>
+        
+        <h2>How this Server Works</h2>
+        <p>This server is hosted using Docker. Docker is an open-source platform that simplifies the deployment and management of applications through containerization. Containers bundle an application and its dependencies into a single package.</p>
+        <p>Every program of this server is built in its own dedicated Docker container. The code can be found in <a href="https://gitlab.empa.ch/vbja/shinychem">this GitLab Repository</a>.</p>
+        <p>For information on how to install Docker, see <a href="https://docs.docker.com/engine/install/">https://docs.docker.com/engine/install/</a>.</p>
+        <p>Once docker containers are installed, they can be accessed in a browser using the address &lt;local IP of the host&gt;:&lt;port&gt; when accessing from a different PC (has to be in the same local network), or localhost:&lt;port&gt; on the Host itself.</p>
+        
+        <h2>Create Docker Container</h2>
+        <p>Individual Docker containers can be created by creating a new directory in <code>~/docker/shiny/</code> that contains your Code as well as a Dockerfile (i.e. a file named <code>Dockerfile</code> without any file extension).</p>
+        <p>The content of this Dockerfile depends on the programming language, as well as on the packages required by the code:</p>
+        
+        <h3>Python</h3>
+        <p>For Python, the required libraries can either be provided in a <code>requirements.txt</code> file, or directly specified in the Dockerfile. This is an example of a Dockerfile for a python Shiny application:</p>
+        
+        <pre><code>
+FROM python:3.12
+
+COPY ./requirements.txt .
+RUN pip3 install -r requirements.txt
+WORKDIR /app
+
+EXPOSE 8080
+
+COPY ./&lt;Name of Python file&gt;.py ./
+
+CMD ["uvicorn", "&lt; Python file&gt;:app", "--host", "0.0.0.0", "--port", "8080"]
+        </code></pre>
+        
+        <p>This part:</p>
+        <pre><code>
+COPY ./requirements.txt .
+RUN pip3 install -r requirements.txt
+        </code></pre>
+        <p>Can be replaced by specifying the required packages directly:</p>
+        <pre><code>
+RUN pip3 install shiny plotly …
+        </code></pre>
+        
+        <h3>R</h3>
+        <p>This is an example of a Dockerfile for a Shiny application written in R:</p>
+        
+        <pre><code>
+# Base R Shiny image
+FROM rocker/shiny
+
+# Make a directory in the container
+RUN mkdir /home/shiny-app
+
+# Install R dependencies
+RUN R -e "install.packages(c('plotly', 'shiny', …))"
+
+# Copy the Shiny app code
+COPY &lt;Name of R file&gt;.R /home/shiny-app/app.R
+
+# Expose the application port
+EXPOSE 8180
+
+# Run the R Shiny app
+CMD ["R", "-e", "shiny::runApp('/home/shiny-app/app.R', host='0.0.0.0', port=8180)"]
+        </code></pre>
+        
+        <h2> Deploy Docker Container </h2>
+        <p>To deploy the Docker container, change directory to the folder of the Docker container and run these commands in a terminal:</p>
+        <pre><code>
+docker kill &lt;name of Docker container&gt;
+docker container prune -f
+docker build -t &lt;author&gt;/&lt;name of Docker container&gt; .
+docker run -d -p &lt;port of Docker container&gt;:8080 --restart unless-stopped --name &lt;name of Docker container&gt; &lt;author&gt;/&lt;name of Docker container&gt;
+        </code></pre>
+        <p>The first two lines are only necessary when the Docker is updated, not when it is created for the first time.</p>
+        <p>The port and name of the Docker container can be chosen freely, as long as they are not already taken by something else</p>
+        <p>It is recommended to save these commands as a bash script (e.g. redeploy.sh) for easier (re)deployment of the Docker container.
+
+        <h2> Update Docker Containers </h2>
+        <p>If there are changes made to the code in the <a href="https://gitlab.empa.ch/vbja/shinychem">GitLab Repository</a>, they can be downloaded and implemented by running <code>python3 update.py</code> in the /shinychem/ directory of the Host. </p>
+        <p>This requires the connection to the repository to be set, so that the changes can be pulled.</p>
+
+        <h2>Create SSL Certificate</h2>
+        <p>To make the code accessible from a domain using a valid SSL certificate, the instructions from <a href="https://www.youtube.com/watch?v=qlcVx-k-02E">this YouTube video</a> were followed:</p>
+        <p>Note that this only has to be done once when the server is initially deployed, afterwards the certificate <i>should</i> renew itself automatically.</p>
+        <ul>
+            <li>Create a DuckDNS account under <a href="http://www.duckdns.org/">http://www.duckdns.org/</a> and add a new Domain using the local IP address of the host PC.</li>
+            <li>Install and login to Nginx Proxy Manager as described in <a href="https://nginxproxymanager.com/guide/">https://nginxproxymanager.com/guide/</a></li>
+            <li>Go to "SSL Certificates" and add a new SSL Certificate with Let's Encrypt:
+                <ul>
+                    <li>Add the domain chosen in DuckDNS, as well as subdomains: *.&lt;DuckDNS domain&gt;.duckdns.org, &lt;DuckDNS domain&gt;.duckdns.org,</li>
+                    <li>Check "Use a DNS Challenge", choose DuckDNS and add the token from your DuckDNS account.</li>
+                    <li>Increase the Propagation seconds to 120 and click Save</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <h2>Create Proxy Host for Docker Container</h2>
+        <p>With the SSL certificate, subdomains can now be added for each of the Docker containers:</p>
+        <ul>
+            <li>In Nginx Proxy Manager go to Hosts -> Proxy Hosts and add a proxy host</li>
+            <li>Choose the desired subdomain of the docker container (e.g. for the Nginx Proxy Manager Docker container enter nginx.&lt;DuckDNS domain&gt;.duckdns.org</li>
+            <li>Add the hostname (can be the local IP or the full chosen DuckDNS domain) and port of the Docker container (e.g. 81 for nginx Proxy Manager)</li>
+            <li>Check the boxes underneath (especially the Websockets support needs to enabled for Shiny apps)</li>
+            <li>Add the SSL certificate in the SSL tab and check the boxes</li>
+            <li>Click Save</li>
+        </ul>
+        <p>The new Docker container is now accessible under the chosen subdomain with a valid SSL certificate.</p>
+
+    </div>
+    <footer>
+    </footer>
+
+</body>
+</html>

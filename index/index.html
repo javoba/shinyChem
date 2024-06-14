@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="favicon.webp" rel="icon">
+    <title>Shiny Server Index</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .section {
+            display: flex;
+            flex-direction: column;
+        }
+        .about-link {
+            position: absolute;
+            bottom: 10px;
+            right: 50px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="empa-horizontal-line"></div>
+        <div>
+            <h1><a href="index.html" style="color: #be0000; font-size: 34px">Shiny Server</a></h1>
+        </div>
+        <nav class="about-link">
+            <a href="about.html">About</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="section">
+            <h2>HTC Simulations</h2>
+            <ul>
+                <li><a title="Simulate the Bode Plot of the HTC for given build parameters" href="https://bode.shinychem.duckdns.org">Bode Plot</a></li>
+                <li><a title="Simulate the response signal of the HTC for arbitrarily designed input signals" href="https://pulse-response.shinychem.duckdns.org">HTC Pulse Response</a></li>
+            </ul>
+            <h2>LIXS</h2>
+            <ul>
+                <li><a title="Show the emission spectra of different elements based on the data from the NIST database" href="https://nist.shinychem.duckdns.org">NIST Spectral Lines</a></li>
+                <li><a title="Show the LIXS spectrum from a .tif file" href="https://lixs.shinychem.duckdns.org">LIXS Spectra</a></li>
+                <li><a title="Calibrate LIXS to convert the pixel number to wavelength" href="https://calibration.shinychem.duckdns.org">LIXS Pixel Number to Wavelength Calibration</a></li>
+                <li><a title="Show the offset of the peak pixel positions when moving the target" href="https://distortion.shinychem.duckdns.org">LIXS Peak Distortion</a></li>
+                <li><a title="Show the focal curve of a grating" href="https://grating.shinychem.duckdns.org">Grating Focal Curve</a></li>
+                <li><a title="Show the heatmap of LIXS spectra showing different stages of the plasma expansion" href="https://heatmap.shinychem.duckdns.org">LIXS Plasma Expansion Heatmap</a></li>
+            </ul>
+
+            <h2>Orbitrap Mass Spectrometer</h2>
+            <ul>
+                <li><a title="Process the data acquired with Orbitrap-MS" href="https://mass-pross.shinychem.duckdns.org">Process Orbitrap Data</a></li>
+            </ul>
+        </div>
+        <div class="section">
+            <h2>Compressed Sensing</h2>
+            <ul>
+                <li><a title="Compressed sensing for rapid tabletop x-ray absorption spectroscopy" href="https://xanes-cs.shinychem.duckdns.org">Compressed Sensing  for XANES</a></li>
+            </ul>
+            <h2>RSM</h2>
+            <ul>
+                <li><a title="Transform .xy files containing RSM data to a single CSV file with x,y and z columns" href="https://rsm.shinychem.duckdns.org">Prepare RSM Data</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+    </footer>
+</body>
+</html>
